@@ -63,29 +63,3 @@ label, input {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* TABLE STYLES */
-table {
-    border-collapse: collapse;
-    margin-top: 20px;
-    width: 100%;
-    table-layout: fixed; /* This helps with minimizing empty space */
-}
-
-th, td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: center;
-}
-
-thead {
-    background-color: #f4f4f4;
-}
-
-tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-/* Hide the last row */
-table tr:last-child {
-    display: none;
-}
