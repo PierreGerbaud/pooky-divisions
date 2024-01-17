@@ -87,12 +87,13 @@ function updateInterface() {
     const playerCount = parseInt(document.getElementById('playerCount').value, 10);
     const minPlayers = parseInt(document.getElementById('minPlayers').value, 10);
     const multiplier = parseFloat(document.getElementById('multiplier').value); // Get the multiplier from the input
+    const silver = parseFloat(document.getElementById('silver').value); // Get the silver from the input
     const { tier, totalDivisions, divisionsPopulation } = calculateTiersAndDivisions(playerCount, minPlayers);
     const rewardShares = calculateRewardShares(tier, multiplier); // Use the multiplier from the input
     const tableBody = document.querySelector("#resultsTable tbody");
     tableBody.innerHTML = ""; // Clear previous results
 
-    let divisionStartIndex = 0; // Ensure this is defined outside the for loop
+    let divisionStartIndex = 0;
     for (let t = 1; t <= tier; t++) {
         const numDivisionsInTier = t <= 2 ? 2 : Math.pow(2, t - 1);
         const divisionEndIndex = divisionStartIndex + numDivisionsInTier;
@@ -119,7 +120,8 @@ function updateInterface() {
     
         const tierRewardShare = rewardShares[t - 1];
         const divisionRewardShare = (tierRewardShare / numDivisionsInTier).toFixed(2);
-    
+        const divisionRewards = (silver * (divisionRewardShare / 100)).toFixed(2); // Calculate division rewards
+        
         let row = `<tr>
             <td>${t}</td>
             <td>${numDivisionsInTier}</td>
@@ -128,13 +130,12 @@ function updateInterface() {
             <td>${totalPlayersInTier}</td>
             <td>${tierRewardShare.toFixed(2)}%</td>
             <td>${divisionRewardShare}%</td>
-            <td></td> <!-- Division Rewards ($SILVER) -->
+            <td>$${divisionRewards}</td> <!-- Division Rewards ($SILVER) -->
         </tr>`;
-    
+
         tableBody.innerHTML += row;
-        divisionStartIndex = divisionEndIndex; // Update the start index for the next iteration
+        divisionStartIndex = divisionEndIndex;
     }
-    
 }
 
 document.addEventListener('DOMContentLoaded', (event) => {
