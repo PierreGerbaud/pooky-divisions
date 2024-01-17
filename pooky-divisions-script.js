@@ -31,49 +31,44 @@ function calculateTiersAndDivisions(playerCount, minPlayers) {
 }
 
 
-function calculateRewardShares(tierCount, extraShareForTopTier) {
+function calculateRewardShares(tierCount, extraShareForTop) {
+    // Initialize an array to hold the share of each tier.
+    let shares = new Array(tierCount).fill(0);
+
     if (tierCount === 1) {
         // If there's only one tier, it gets all the rewards.
-        return [100];
+        shares[0] = 100;
+        return shares;
     }
 
-    // Initialize shares with zeros for all tiers.
-    let shares = new Array(tierCount).fill(0);
-    shares[tierCount - 1] = 0; // Last tier gets 0%.
+    // Calculate the base share for the second-to-last tier.
+    let baseShare = (100 / (tierCount - 1 + extraShareForTop));
 
-    // The top tier gets the extra share. Second to last tier is the baseline for calculation.
-    let baseShare = (100 / (tierCount - 1)) / (1 + extraShareForTopTier);
-    shares[tierCount - 2] = baseShare;
-    shares[0] = baseShare * extraShareForTopTier;
-
-    // Calculate the increment based on the remaining percentage and the remaining tiers to distribute it.
-    let remainingShare = 100 - (shares[0] + shares[tierCount - 2]);
-    let increment = remainingShare / (tierCount - 2);
-
-    // Assign reward shares in ascending order, excluding the first and last tier.
-    for (let i = 1; i < tierCount - 2; i++) {
-        shares[i] = shares[i - 1] + increment;
+    // Assign shares starting from the second-to-last tier and distribute the remaining share linearly.
+    for (let i = tierCount - 2; i > 0; i--) {
+        shares[i] = baseShare;
     }
 
-    // Round the shares to two decimal places and ensure the sum is 100%.
-    let roundedShares = shares.map(share => parseFloat(share.toFixed(2)));
-    let sumOfShares = roundedShares.reduce((a, b) => a + b, 0);
+    // Set the share for the last tier (0%) and the top tier.
+    shares[tierCount - 1] = 0; // Last tier gets 0%
+    shares[0] = baseShare * extraShareForTop; // Top tier gets its share.
 
-    // Adjust the last rewarding tier slightly if rounding errors caused the sum to deviate from 100%.
-    if (sumOfShares !== 100) {
-        roundedShares[tierCount - 2] += 100 - sumOfShares;
+    // Ensure the total sums up to 100% due to possible floating-point arithmetic issues.
+    let totalShare = shares.reduce((acc, share) => acc + share, 0);
+    if (totalShare !== 100) {
+        let discrepancy = 100 - totalShare;
+        shares[1] += discrepancy; // Adjust the second tier to fix the total
     }
 
-    return roundedShares;
+    // Round the shares to two decimal places.
+    return shares.map(share => Math.round(share * 100) / 100);
 }
-
 
 function updateInterface() {
     const playerCount = parseInt(document.getElementById('playerCount').value, 10);
     const minPlayers = parseInt(document.getElementById('minPlayers').value, 10);
     const { tier, totalDivisions, divisionsPopulation } = calculateTiersAndDivisions(playerCount, minPlayers);
-    const extraShareForTopTier = 1.5; // Top tier gets 50% more than the second-to-last tier
-    const rewardShares = calculateRewardShares(tier, extraShareForTopTier);   
+    const rewardShares = calculateRewardShares(tier, 1.5); // Top tier gets 50% more than the second-to-last tier
     const tableBody = document.querySelector("#resultsTable tbody");
     tableBody.innerHTML = ""; // Clear previous results
 
