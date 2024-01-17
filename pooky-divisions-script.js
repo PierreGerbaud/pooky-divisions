@@ -1,37 +1,33 @@
 function calculateTiersAndDivisions(playerCount, minPlayers) {
     let tier = 0;
-    let totalDivisions = 2; // Starting with 2 divisions in Tier 1
-    let playersInCurrentTier = totalDivisions * minPlayers -1;
+    let totalDivisions = 0;
+    let playersInCurrentTier = -1;
 
-    // Calculate how many tiers we need
+    // Find the correct tier and number of divisions
     while (playerCount > playersInCurrentTier) {
         tier++;
-        if (tier === 2) {
-            totalDivisions += 2; // Tier 2 also has 2 divisions
-        } else {
-            totalDivisions *= 2; // Doubling the divisions for the next tier
-        }
-        playersInCurrentTier = totalDivisions * minPlayers;
+        totalDivisions = tier === 1 ? 2 : totalDivisions * 2; // Tier 1 has 2 divisions, double for each subsequent tier
+        playersInCurrentTier = totalDivisions * minPlayers - 1; // Your adjustment
     }
 
-    // Distribute players as equally as possible
-    let divisionsPopulation = new Array(totalDivisions).fill(minPlayers);
+    // Distribute players across divisions
+    let divisionsPopulation = Array(totalDivisions).fill(minPlayers);
     let excessPlayers = playerCount - (minPlayers * totalDivisions);
 
-    let i = 0;
-    // Distribute excess players one by one to each division until all are allocated
+    // Spread excess players as evenly as possible across divisions
+    let index = 0;
     while (excessPlayers > 0) {
-        divisionsPopulation[i]++;
+        divisionsPopulation[index]++;
         excessPlayers--;
-        i = (i + 1) % totalDivisions; // Loop back to the first division after the last
+        index = (index + 1) % totalDivisions; // Ensure we loop back to the first division
     }
 
     return { tier, divisionsPopulation };
 }
 
 function updateInterface() {
-    const playerCount = parseInt(document.getElementById('playerCount').value);
-    const minPlayers = parseInt(document.getElementById('minPlayers').value);
+    const playerCount = parseInt(document.getElementById('playerCount').value, 10);
+    const minPlayers = parseInt(document.getElementById('minPlayers').value, 10);
 
     const { tier, divisionsPopulation } = calculateTiersAndDivisions(playerCount, minPlayers);
 
