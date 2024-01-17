@@ -1,7 +1,7 @@
 function calculateTiersAndDivisions(playerCount, minPlayers) {
     let tier = 0;
     let totalDivisions = 2; // Starting with 2 divisions in Tier 1
-    let playersInCurrentTier = totalDivisions * minPlayers;
+    let playersInCurrentTier = totalDivisions * minPlayers -1;
 
     // Calculate how many tiers we need
     while (playerCount > playersInCurrentTier) {
