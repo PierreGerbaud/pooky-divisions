@@ -36,3 +36,22 @@ function calculateTiersAndDivisions(playerCount, minPlayers) {
 
     return { tier, divisionsPopulation };
 }
+
+
+function updateInterface() {
+    console.log("Update interface called");
+    const playerCount = parseInt(document.getElementById('playerCount').value, 10);
+    const minPlayers = parseInt(document.getElementById('minPlayers').value, 10);
+    const minPlayersToStart = minPlayers * 2;
+    const { tier, divisionsPopulation } = calculateTiersAndDivisions(playerCount, minPlayers);
+
+    // Update the interface with the results
+    document.getElementById('output').innerHTML = playerCount >= minPlayersToStart ?
+        `Total Tiers: ${tier}<br>Division Populations: ${divisionsPopulation.join(', ')}` :
+        `Not enough players to start the game. Minimum required: ${minPlayersToStart}`;
+}
+// ... JavaScript logic for calculateTiersAndDivisions and updateInterface ...
+
+document.addEventListener('DOMContentLoaded', (event) => {
+    document.getElementById('updateButton').addEventListener('click', updateInterface);
+});
