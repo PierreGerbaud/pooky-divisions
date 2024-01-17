@@ -47,8 +47,12 @@ function updateInterface() {
 
     let divisionStartIndex = 0;
     for (let t = 1; t <= tier; t++) {
-        const numDivisionsInTier = t === 1 ? 2 : Math.pow(2, t - 2);
-        const divisionEndIndex = divisionStartIndex + numDivisionsInTier;
+        let numDivisionsInTier;
+        if (t === 1) {
+            numDivisionsInTier = 2; // Tier 1 always has 2 divisions
+        } else {
+            numDivisionsInTier = Math.pow(2, t - 2); // Adjusted to correctly calculate the number of divisions for Tier 2 and onward
+        }        const divisionEndIndex = divisionStartIndex + numDivisionsInTier;
         const minPlayersInTier = Math.min(...divisionsPopulation.slice(divisionStartIndex, divisionEndIndex));
         const maxPlayersInTier = Math.max(...divisionsPopulation.slice(divisionStartIndex, divisionEndIndex));
         const totalPlayersInTier = divisionsPopulation.slice(divisionStartIndex, divisionEndIndex).reduce((a, b) => a + b, 0);
