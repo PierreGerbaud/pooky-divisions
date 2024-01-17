@@ -30,10 +30,10 @@ function calculateTiersAndDivisions(playerCount, minPlayers) {
 }
 
 function updateInterface() {
+    console.log("Update interface called");
     const playerCount = parseInt(document.getElementById('playerCount').value, 10);
     const minPlayers = parseInt(document.getElementById('minPlayers').value, 10);
     const minPlayersToStart = minPlayers * 2;
-
     const { tier, divisionsPopulation } = calculateTiersAndDivisions(playerCount, minPlayers);
 
     // Update the interface with the results
