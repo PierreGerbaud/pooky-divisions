@@ -31,27 +31,37 @@ function calculateTiersAndDivisions(playerCount, minPlayers) {
 }
 
 
-function calculateRewardShares(tierCount, extraShareForTop) {
-    let tiersMinusOne = tierCount - 1;
-    let baseShare = 100 / tiersMinusOne;
-
-    let topMultiplier = 1 + extraShareForTop / 2;
-    let bottomMultiplier = 1 - extraShareForTop / 2;
-
+function calculateRewardShares(tierCount, topTierExtra) {
+    // Initialize shares array
     let shares = new Array(tierCount).fill(0);
-    shares[0] = baseShare * topMultiplier; // Top tier
-    shares[tierCount - 1] = 0; // Bottom tier (last tier)
 
-    let remainingShare = 100 - (shares[0] + shares[tierCount - 1]);
-    let increment = (remainingShare - (baseShare * bottomMultiplier)) / (tiersMinusOne - 2);
+    // Calculate the base share for T2 to T4 (T1 has the extra, T5 is 0)
+    let distributedShare = 100 / (tierCount - 1); // Share to distribute between T2 to T5
+    let difference = distributedShare * topTierExtra / (tierCount - 2); // Difference between adjacent tiers
 
-    for (let i = 1; i < tierCount - 1; i++) {
-        shares[i] = (baseShare * bottomMultiplier) + increment * (i - 1);
-        shares[i] = parseFloat(shares[i].toFixed(2)); // Round to two decimal places
+    // Assign shares starting from T4 up to T2
+    for (let i = tierCount - 2; i > 0; i--) {
+        shares[i] = distributedShare - difference * (tierCount - 2 - i);
     }
+
+    // Calculate T1 with the extra share
+    shares[0] = shares[1] + difference;
+
+    // Ensure T5 is 0%
+    shares[tierCount - 1] = 0;
+
+    // Round to three decimal places to prevent floating-point precision issues
+    shares = shares.map(share => parseFloat(share.toFixed(3)));
 
     return shares;
 }
+
+// Example usage with 5 tiers and top tier having extra 50%
+let tierCount = 5;
+let topTierExtra = 0.5; // Extra 50% for top tier
+let rewardShares = calculateRewardShares(tierCount, topTierExtra);
+console.log(rewardShares);
+
 
 // Example usage
 let tierCount = 10; // Example tier count
