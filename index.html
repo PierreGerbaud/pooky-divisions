@@ -9,29 +9,39 @@
 </head>
 <body>
     <h1>Player Ranking System</h1>
-    <div>
-        <label for="playerCount">Number of Players:</label>
-        <input type="number" id="playerCount" value="417" min="1">
+    <div id="reader-note" class="reader-note">
+        <p>This model shows a possible division system for Pooky.</p>
+        <p>After each matchday of a given League, players are ranking up or down.</p>
+        <p>Edge cases and problematic cases:</p>
+        <ul>
+            <li><i>When a new division opens, all other divisions have to reduce their amount of players, leading to some people getting disranked.</i></li>
+            <li><i>How do we seed new players? After how long do we remove inactive players?</i></li>
+            <li><i>It will be harder to guarantee average ROI for higher rarities, as a bad streak can take them down by a couple ranks.</i></li>
+        </ul>
+        <p><i>Latest update 17/01/2024</i></p>
     </div>
-    <div>
-        <label for="minPlayers">Minimum Players per Division:</label>
-        <input type="number" id="minPlayers" value="16" min="16">
-    </div>
-    <div>
-        <label for="multiplier">Top Tier Multiplier:</label>
-        <input type="number" id="multiplier" value="0.5" step="0.01" min="0">
-    </div>
-    <div>
-        <label for="silver">Total SILVER:</label>
-        <input type="number" id="silver" value="1000000" min="0">
-    </div>
-    <div>
-        <label for="silverDollarPrice">SILVER:DOLLAR Price:</label>
-        <input type="number" id="silverDollarPrice" value="0.01" step="0.01" min="0">
-    </div>
-    </div>
-    <div>
-        <button id="updateButton">Update Rankings</button>
+    <div class="parameters">
+        <div class="input-group">
+            <label for="playerCount">Number of Players:</label>
+            <input type="number" id="playerCount" value="100" min="1">
+        </div>
+        <div class="input-group">
+            <label for="minPlayers">Minimum Players per Division:</label>
+            <input type="number" id="minPlayers" value="16" min="16">
+        </div>
+        <div class="input-group">
+            <label for="multiplier">Top Tier Multiplier:</label>
+            <input type="number" id="multiplier" value="1.5" step="0.1" min="0">
+        </div>
+        <div class="input-group">
+            <label for="silver">Total SILVER:</label>
+            <input type="number" id="silver" value="1000000" min="0">
+        </div>
+        <div class="input-group">
+            <label for="silverDollarPrice">SILVER:DOLLAR Price:</label>
+            <input type="number" id="silverDollarPrice" value="0.01" step="0.01" min="0">
+        </div>
+        <button id="updateButton" class="big-button">Update Rankings</button>
     </div>
     <div id="output"></div>
 

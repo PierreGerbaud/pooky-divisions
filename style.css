@@ -13,6 +13,25 @@ label, input {
     margin: 5px 0;
 }
 
+
+/* READER NOTE STYLES */
+
+
+.reader-note {
+    font-style: italic;
+    margin-bottom: 20px;
+}
+
+.reader-note ul {
+    padding-left: 20px;
+}
+
+.reader-note li {
+    list-style-type: disc;
+}
+
+
+
 /* PARAMETERS AREA STYLES */
 .parameters {
     display: flex;
