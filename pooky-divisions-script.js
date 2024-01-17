@@ -15,7 +15,7 @@ function calculateTiersAndDivisions(playerCount, minPlayers) {
 
         // Distribute players across divisions
         let divisionsPopulation = new Array(totalDivisions).fill(minPlayers);
-        let excessPlayers = playerCount - playersInCurrentTier;
+        let excessPlayers = playerCount - (totalDivisions * minPlayers);
 
         // Spread excess players across divisions as evenly as possible
         let index = 0;
