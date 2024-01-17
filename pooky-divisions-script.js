@@ -1,19 +1,19 @@
 function calculateTiersAndDivisions(playerCount, minPlayers) {
     let tier = 1;
-    let totalDivisions = 2; // Starting with 2 divisions in Tier 1
-    let maxPlayersInCurrentTier = totalDivisions * minPlayers * 2;
+    let totalDivisions = 2; // Tier 1 starts with 2 divisions
+    let maxPlayersInCurrentTier = totalDivisions * minPlayers * 2; // Maximum capacity of the current tier
 
     // Adjust tier and total divisions based on player count
     while (playerCount > maxPlayersInCurrentTier) {
         tier++;
         if (tier === 2) {
-            // Tier 2 has the same number of divisions as Tier 1
+            // Tier 2 also has 2 divisions
             totalDivisions = 2;
         } else {
-            // From Tier 3 onwards, double the number of divisions from the previous tier
-            totalDivisions *= 2;
+            // Tier 3 and beyond follow the 2^(N-1) rule
+            totalDivisions = Math.pow(2, tier - 1);
         }
-        maxPlayersInCurrentTier = totalDivisions * minPlayers * 2; // Update the max players for the current tier
+        maxPlayersInCurrentTier = totalDivisions * minPlayers * 2; // Update the capacity for the new tier
     }
 
     // Distribute players across divisions
@@ -22,15 +22,14 @@ function calculateTiersAndDivisions(playerCount, minPlayers) {
 
     let index = 0;
     while (excessPlayers > 0) {
-        if (divisionsPopulation[index] < minPlayers * 2) {
-            divisionsPopulation[index]++;
-            excessPlayers--;
-        }
+        divisionsPopulation[index]++;
+        excessPlayers--;
         index = (index + 1) % totalDivisions; // Loop back to the first division
     }
 
     return { tier, totalDivisions, divisionsPopulation };
 }
+
 
 
 
