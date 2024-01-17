@@ -4,20 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Player Ranking System</title>
-    <script src="pooky-divisions-script.js" defer></script>
+    <script src="script.js" defer></script>
 </head>
 <body>
     <h1>Player Ranking System</h1>
     <div>
         <label for="playerCount">Number of Players:</label>
-        <input type="number" id="playerCount" value="100">
+        <input type="number" id="playerCount" value="100" min="1">
     </div>
     <div>
-        <label for="minPlayers">Minimum Players per Division:</label>
-        <input type="number" id="minPlayers" value="16">
+        <label for="minPlayers">Minimum Players per Division (minimum 32 to start game):</label>
+        <input type="number" id="minPlayers" value="16" min="16">
     </div>
     <div>
-        <button onclick="updateInterface()">Update</button>
+        <button onclick="updateInterface()">Update Rankings</button>
     </div>
     <div id="output"></div>
 </body>
