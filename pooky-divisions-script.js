@@ -69,28 +69,17 @@ function updateInterface() {
     const tableBody = document.querySelector("#resultsTable tbody");
     tableBody.innerHTML = ""; // Clear previous results
 
-
-        let divisionStartIndex = 0;
-        for (let t = 1; t <= tier; t++) {
-        // Calculate the number of divisions in this tier
-        const numDivisionsInTier = t <= 2 ? 2 : Math.pow(2, t - 1);
-
-        // Calculate the player range for each division in this tier
-        let minPlayersInTier = Number.MAX_VALUE;
-        let maxPlayersInTier = 0;
-        for (let i = divisionStartIndex; i < divisionStartIndex + numDivisionsInTier; i++) {
-            if (divisionsPopulation[i] < minPlayersInTier) {
-                minPlayersInTier = divisionsPopulation[i];
-            }
-            if (divisionsPopulation[i] > maxPlayersInTier) {
-                maxPlayersInTier = divisionsPopulation[i];
-            }
-        }
-        
+    let divisionStartIndex = 0;
+    for (let t = 1; t <= tier; t++) {
         const numDivisionsInTier = t <= 2 ? 2 : Math.pow(2, t - 1);
         const divisionEndIndex = divisionStartIndex + numDivisionsInTier;
-        const minPlayersInTier = Math.min(...divisionsPopulation.slice(divisionStartIndex, divisionEndIndex));
-        const maxPlayersInTier = Math.max(...divisionsPopulation.slice(divisionStartIndex, divisionEndIndex));
+        let minPlayersInTier = Number.MAX_VALUE;
+        let maxPlayersInTier = -Number.MAX_VALUE;
+        for (let i = divisionStartIndex; i < divisionEndIndex; i++) {
+            minPlayersInTier = Math.min(minPlayersInTier, divisionsPopulation[i]);
+            maxPlayersInTier = Math.max(maxPlayersInTier, divisionsPopulation[i]);
+        }
+        
         const totalPlayersInTier = divisionsPopulation.slice(divisionStartIndex, divisionEndIndex).reduce((a, b) => a + b, 0);
         const tierRewardShare = rewardShares[t - 1];
         const divisionRewardShare = (tierRewardShare / numDivisionsInTier).toFixed(2);
@@ -107,8 +96,7 @@ function updateInterface() {
         </tr>`;
 
         tableBody.innerHTML += row;
-        divisionStartIndex += numDivisionsInTier;
-        if (divisionStartIndex >= divisionsPopulation.length) break; // Break the loop if we've assigned all divisions
+        divisionStartIndex = divisionEndIndex;
     }
 }
 
