@@ -11,7 +11,7 @@ function calculateTiersAndDivisions(playerCount, minPlayers) {
             totalDivisions = 2;
         } else {
             // Tier 3 and beyond follow the 2^(N-1) rule
-            totalDivisions = Math.pow(2, tier);
+            totalDivisions = Math.pow(2, tier -1);
         }
         maxPlayersInCurrentTier = totalDivisions * minPlayers * 2; // Update the capacity for the new tier
     }
