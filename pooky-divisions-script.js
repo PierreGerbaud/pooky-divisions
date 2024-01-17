@@ -31,88 +31,58 @@ function calculateTiersAndDivisions(playerCount, minPlayers) {
 }
 
 function calculateRewardShares(tierCount, multiplierY) {
-    // Calculate the number of tiers minus one
-    const tiersMinusOne = tierCount - 1;
+    if (tierCount <= 2) {
+        // If there are 2 or fewer tiers, distribute all rewards to the top tier
+        return tierCount === 1 ? [100] : [100, 0];
+    }
 
-    // Divide 100% by the result to get the base share for each tier except the top and bottom
-    const baseShare = 95 / tiersMinusOne;
-
-    // Compute the bottom multiplier
-    const bottomMultiplier = 2 / (2 + multiplierY);
-
-    // Compute the top multiplier
-    const topMultiplier = bottomMultiplier * (1 + multiplierY);
-
-    // Compute all reward splits
-    const topShare = baseShare * topMultiplier;
-    const bottomShare = baseShare * bottomMultiplier; // This will actually be 0 since the bottom tier gets nothing
+    const tiersToDistribute = tierCount - 2; // Distribute rewards to top (N-2) tiers
+    const baseShare = 100 / (tiersToDistribute + multiplierY);
 
     // Initialize shares array
     let shares = new Array(tierCount).fill(0);
+    shares[0] = baseShare * (1 + multiplierY); // Top tier share
+    shares.fill(baseShare, 1, tiersToDistribute); // Distribute evenly across (N-2) tiers
+    shares[tierCount - 1] = 0; // Last tier (Nth tier) gets 0
 
-    // Set the top tier's share
-    shares[0] = topShare;
-
-    // Linear interpolation for the other tiers
-    const increment = (topShare - bottomShare) / (tierCount - 2);
-    for (let i = 1; i < tierCount - 1; i++) {
-        shares[i] = shares[i - 1] - increment;
+    // Correct the total to account for rounding errors
+    const total = shares.reduce((acc, share) => acc + share, 0);
+    const discrepancy = 100 - total;
+    if (discrepancy !== 0) {
+        shares[1] += discrepancy; // Adjust the second tier to fix the total
     }
 
-    // The bottom tier (last tier) gets 0%
-    shares[tierCount - 1] = 0;
-
-    // Round shares to two decimal places and adjust to ensure the sum is 100%
-    let totalShare = shares.reduce((acc, share) => acc + share, 0);
-    let adjustment = 95 - totalShare;
-
-    // Apply the adjustment to the top tier
-    shares[0] += adjustment;
-    shares[0] += 5;
-
-    // Round the shares to two decimal places
+    // Round shares to two decimal places
     shares = shares.map(share => parseFloat(share.toFixed(2)));
 
     return shares;
 }
 
-// Example usage
-const tierCountExample = 10; // Example tier count
-const multiplierYExample = 0.25; // Multiplier for the top tier
-const rewardSharesExample = calculateRewardShares(tierCountExample, multiplierYExample);
-console.log(rewardSharesExample);
-
-
 function updateInterface() {
     const playerCount = parseInt(document.getElementById('playerCount').value, 10);
     const minPlayers = parseInt(document.getElementById('minPlayers').value, 10);
-    const multiplier = parseFloat(document.getElementById('multiplier').value);
-    const silver = parseInt(document.getElementById('silver').value); // Round silver to the nearest integer
-    const silverDollarPrice = parseFloat(document.getElementById('silverDollarPrice').value);
+    const multiplier = parseFloat(document.getElementById('multiplier').value); // Get the multiplier from the input
     const { tier, totalDivisions, divisionsPopulation } = calculateTiersAndDivisions(playerCount, minPlayers);
-    const rewardShares = calculateRewardShares(tier, multiplier);
+    const rewardShares = calculateRewardShares(tier, multiplier); // Use the multiplier from the input
     const tableBody = document.querySelector("#resultsTable tbody");
-    tableBody.innerHTML = "";
+    tableBody.innerHTML = ""; // Clear previous results
 
-    let divisionStartIndex = 0;
     for (let t = 1; t <= tier; t++) {
         const numDivisionsInTier = t <= 2 ? 2 : Math.pow(2, t - 1);
         const divisionEndIndex = divisionStartIndex + numDivisionsInTier;
-            
-        // Initialize the variables with the first element of the current tier or default values if out of bounds
+        
         let minPlayersInTier = Number.MAX_VALUE;
         let maxPlayersInTier = -Number.MAX_VALUE;
         let totalPlayersInTier = 0;
     
         for (let i = divisionStartIndex; i < divisionEndIndex; i++) {
-            if (i < divisionsPopulation.length) { // Check bounds to avoid undefined
+            if (i < divisionsPopulation.length) {
                 minPlayersInTier = Math.min(minPlayersInTier, divisionsPopulation[i]);
                 maxPlayersInTier = Math.max(maxPlayersInTier, divisionsPopulation[i]);
                 totalPlayersInTier += divisionsPopulation[i];
             }
         }
         
-        // Check if no divisions were found for this tier, and set values to 0 to avoid NaN or undefined
         if(minPlayersInTier === Number.MAX_VALUE) {
             minPlayersInTier = 0;
             maxPlayersInTier = 0;
@@ -120,31 +90,24 @@ function updateInterface() {
         }
     
         const tierRewardShare = rewardShares[t - 1];
-        const divisionRewardShare = tierRewardShare / numDivisionsInTier;
-        const divisionRewards = Math.round(silver * (divisionRewardShare / 100));
-        const averageSilverPerPlayer = divisionRewards / maxPlayersInTier;
-        const averageDollarValuePerPlayer = averageSilverPerPlayer * silverDollarPrice;
-
-        // Format numbers with thousands separator
-        const formattedDivisionRewards = divisionRewards.toLocaleString();
-        const formattedAverageSilverPerPlayer = averageSilverPerPlayer.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-        const formattedAverageDollarValuePerPlayer = averageDollarValuePerPlayer.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-
+        const divisionRewardShare = (tierRewardShare / numDivisionsInTier).toFixed(2);
+    
+        // Update the row template to include conditionals for handling the last tier with no rewards
         let row = `<tr>
             <td>${t}</td>
             <td>${numDivisionsInTier}</td>
             <td>${minPlayersInTier}</td>
             <td>${maxPlayersInTier}</td>
             <td>${totalPlayersInTier}</td>
-            <td>${tierRewardShare.toFixed(2)}%</td>
-            <td>${divisionRewardShare.toFixed(2)}%</td>
-            <td>${formattedDivisionRewards}</td>
-            <td>${formattedAverageSilverPerPlayer}</td>
-            <td>${formattedAverageDollarValuePerPlayer}</td>
+            <td>${t === tier ? '0.00' : tierRewardShare.toFixed(2)}%</td>
+            <td>${t === tier ? '0.00' : divisionRewardShare}%</td>
+            <td></td> <!-- SILVER per division will be calculated later -->
+            <td></td> <!-- Average SILVER per player -->
+            <td></td> <!-- Average USD per player -->
         </tr>`;
-
+    
         tableBody.innerHTML += row;
-        divisionStartIndex = divisionEndIndex;
+        divisionStartIndex = divisionEndIndex; // Update the start index for the next iteration
     }
 }
 
