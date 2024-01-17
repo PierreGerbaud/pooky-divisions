@@ -69,24 +69,33 @@ function updateInterface() {
     const tableBody = document.querySelector("#resultsTable tbody");
     tableBody.innerHTML = ""; // Clear previous results
 
-    let divisionStartIndex = 0;
     for (let t = 1; t <= tier; t++) {
         const numDivisionsInTier = t <= 2 ? 2 : Math.pow(2, t - 1);
         const divisionEndIndex = divisionStartIndex + numDivisionsInTier;
-        let minPlayersInTier = divisionsPopulation[divisionStartIndex]; // Initialize to the first division's population
-        let maxPlayersInTier = divisionsPopulation[divisionStartIndex]; // Initialize to the first division's population
-
+        
+        // Initialize the variables with the first element of the current tier or default values if out of bounds
+        let minPlayersInTier = Number.MAX_VALUE;
+        let maxPlayersInTier = -Number.MAX_VALUE;
+        let totalPlayersInTier = 0;
+    
         for (let i = divisionStartIndex; i < divisionEndIndex; i++) {
-            if (i < divisionsPopulation.length) { // Make sure we don't go out of the array's bounds
+            if (i < divisionsPopulation.length) { // Check bounds to avoid undefined
                 minPlayersInTier = Math.min(minPlayersInTier, divisionsPopulation[i]);
                 maxPlayersInTier = Math.max(maxPlayersInTier, divisionsPopulation[i]);
+                totalPlayersInTier += divisionsPopulation[i];
             }
         }
-
-        const totalPlayersInTier = minPlayersInTier * numDivisionsInTier; // Since all divisions within a tier have the same population
+        
+        // Check if no divisions were found for this tier, and set values to 0 to avoid NaN or undefined
+        if(minPlayersInTier === Number.MAX_VALUE) {
+            minPlayersInTier = 0;
+            maxPlayersInTier = 0;
+            totalPlayersInTier = 0;
+        }
+    
         const tierRewardShare = rewardShares[t - 1];
         const divisionRewardShare = (tierRewardShare / numDivisionsInTier).toFixed(2);
-
+    
         let row = `<tr>
             <td>${t}</td>
             <td>${numDivisionsInTier}</td>
@@ -97,10 +106,11 @@ function updateInterface() {
             <td>${divisionRewardShare}%</td>
             <td></td> <!-- Division Rewards ($SILVER) -->
         </tr>`;
-
+    
         tableBody.innerHTML += row;
         divisionStartIndex = divisionEndIndex; // Update the start index for the next iteration
     }
+    
 }
 
 document.addEventListener('DOMContentLoaded', (event) => {
