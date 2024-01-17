@@ -41,5 +41,9 @@ function updateInterface() {
         `Total Tiers: ${tier}<br>Division Populations: ${divisionsPopulation.join(', ')}` :
         `Not enough players to start the game. Minimum required: ${minPlayersToStart}`;
 }
+// ... JavaScript logic for calculateTiersAndDivisions and updateInterface ...
 
-window.onload = updateInterface;
+document.addEventListener('DOMContentLoaded', (event) => {
+    document.getElementById('updateButton').addEventListener('click', updateInterface);
+});
+
