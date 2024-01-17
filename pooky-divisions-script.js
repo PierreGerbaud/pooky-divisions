@@ -62,13 +62,6 @@ let topTierExtra = 0.5; // Extra 50% for top tier
 let rewardShares = calculateRewardShares(tierCount, topTierExtra);
 console.log(rewardShares);
 
-
-// Example usage
-let tierCount = 10; // Example tier count
-let extraShareForTop = 0.5; // 50% more for the top tier
-let rewardShares = calculateRewardShares(tierCount, extraShareForTop);
-console.log(rewardShares);
-
 function updateInterface() {
     const playerCount = parseInt(document.getElementById('playerCount').value, 10);
     const minPlayers = parseInt(document.getElementById('minPlayers').value, 10);
