@@ -27,10 +27,20 @@ function calculateTiersAndDivisions(playerCount, minPlayers) {
     return { tier, divisionsPopulation };
 }
 
+function calculateRewardShares(tierCount) {
+    let shares = [];
+    let increment = 4 / (tierCount - 1);  // Calculate increment for each tier
+    for (let i = tierCount - 1; i >= 0; i--) {
+        shares.push(i * increment);
+    }
+    return shares; // Returns an array with the share for each tier
+}
+
 function updateInterface() {
     const playerCount = parseInt(document.getElementById('playerCount').value, 10);
     const minPlayers = parseInt(document.getElementById('minPlayers').value, 10);
     const { tier, divisionsPopulation } = calculateTiersAndDivisions(playerCount, minPlayers);
+    const rewardShares = calculateRewardShares(tier); // Get reward shares for each tier
 
     const tableBody = document.querySelector("#resultsTable tbody");
     tableBody.innerHTML = ""; // Clear previous results
@@ -41,14 +51,18 @@ function updateInterface() {
         const divisionEndIndex = divisionStartIndex + numDivisionsInTier;
         const minPlayersInTier = Math.min(...divisionsPopulation.slice(divisionStartIndex, divisionEndIndex));
         const maxPlayersInTier = Math.max(...divisionsPopulation.slice(divisionStartIndex, divisionEndIndex));
+        const totalPlayersInTier = divisionsPopulation.slice(divisionStartIndex, divisionEndIndex).reduce((a, b) => a + b, 0);
+        const tierRewardShare = rewardShares[t - 1];
+        const divisionRewardShare = tierRewardShare / numDivisionsInTier;
 
         let row = `<tr>
             <td>${t}</td>
             <td>${numDivisionsInTier}</td>
             <td>${minPlayersInTier}</td>
             <td>${maxPlayersInTier}</td>
-            <td></td> <!-- Tier Share of Rewards -->
-            <td></td> <!-- Division Share of Rewards -->
+            <td>${totalPlayersInTier}</td>
+            <td>${tierRewardShare.toFixed(2)}%</td>
+            <td>${divisionRewardShare.toFixed(2)}%</td>
             <td></td> <!-- Division Rewards ($SILVER) -->
         </tr>`;
 
@@ -59,5 +73,5 @@ function updateInterface() {
 
 document.addEventListener('DOMContentLoaded', (event) => {
     document.getElementById('updateButton').addEventListener('click', updateInterface);
-    updateInterface(); 
+    updateInterface(); // Initialize with default player count
 });
