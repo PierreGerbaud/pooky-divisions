@@ -6,8 +6,12 @@ function calculateTiersAndDivisions(playerCount, minPlayers) {
     // Adjust tier and total divisions based on player count
     while (playerCount > maxPlayersInCurrentTier) {
         tier++;
-        // From Tier 3 onwards, the divisions double with each tier
-        totalDivisions = tier === 2 ? totalDivisions : totalDivisions * 2;
+        // Correctly adjust totalDivisions for Tier 2 and beyond
+        if (tier === 2) {
+            totalDivisions = 2; // Tier 2 also has 2 divisions
+        } else {
+            totalDivisions *= 2; // Tier 3 and beyond double the divisions of the previous tier
+        }
         maxPlayersInCurrentTier = totalDivisions * minPlayers * 2;
     }
 
@@ -19,11 +23,12 @@ function calculateTiersAndDivisions(playerCount, minPlayers) {
     while (excessPlayers > 0) {
         divisionsPopulation[index]++;
         excessPlayers--;
-        index = (index + 1) % totalDivisions;
+        index = (index + 1) % totalDivisions; // Loop back to the first division
     }
 
-    return { tier, divisionsPopulation };
+    return { tier, totalDivisions, divisionsPopulation };
 }
+
 
 
 function calculateRewardShares(tierCount) {
@@ -53,9 +58,8 @@ function calculateRewardShares(tierCount) {
 function updateInterface() {
     const playerCount = parseInt(document.getElementById('playerCount').value, 10);
     const minPlayers = parseInt(document.getElementById('minPlayers').value, 10);
-    const { tier, divisionsPopulation } = calculateTiersAndDivisions(playerCount, minPlayers);
+    const { tier, totalDivisions, divisionsPopulation } = calculateTiersAndDivisions(playerCount, minPlayers);    
     const rewardShares = calculateRewardShares(tier); // Get reward shares for each tier
-
     const tableBody = document.querySelector("#resultsTable tbody");
     tableBody.innerHTML = ""; // Clear previous results
 
