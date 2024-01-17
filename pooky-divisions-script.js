@@ -6,13 +6,14 @@ function calculateTiersAndDivisions(playerCount, minPlayers) {
     // Adjust tier and total divisions based on player count
     while (playerCount > maxPlayersInCurrentTier) {
         tier++;
-        // Correctly adjust totalDivisions for Tier 2 and beyond
         if (tier === 2) {
-            totalDivisions = 2; // Tier 2 also has 2 divisions
+            // Tier 2 has the same number of divisions as Tier 1
+            totalDivisions = 2;
         } else {
-            totalDivisions *= 2; // Tier 3 and beyond double the divisions of the previous tier
+            // From Tier 3 onwards, double the number of divisions from the previous tier
+            totalDivisions *= 2;
         }
-        maxPlayersInCurrentTier = totalDivisions * minPlayers * 2;
+        maxPlayersInCurrentTier = totalDivisions * minPlayers * 2; // Update the max players for the current tier
     }
 
     // Distribute players across divisions
@@ -21,8 +22,10 @@ function calculateTiersAndDivisions(playerCount, minPlayers) {
 
     let index = 0;
     while (excessPlayers > 0) {
-        divisionsPopulation[index]++;
-        excessPlayers--;
+        if (divisionsPopulation[index] < minPlayers * 2) {
+            divisionsPopulation[index]++;
+            excessPlayers--;
+        }
         index = (index + 1) % totalDivisions; // Loop back to the first division
     }
 
@@ -62,6 +65,10 @@ function updateInterface() {
     const rewardShares = calculateRewardShares(tier); // Get reward shares for each tier
     const tableBody = document.querySelector("#resultsTable tbody");
     tableBody.innerHTML = ""; // Clear previous results
+
+    let divisionCounter = 0;
+    for (let t = 1; t <= tier; t++) {
+        const numDivisionsInTier = t === 1 ? 2 : (t === 2 ? 2 : Math.pow(2, t - 2));
 
     let divisionStartIndex = 0;
     for (let t = 1; t <= tier; t++) {
