@@ -32,37 +32,32 @@ function calculateTiersAndDivisions(playerCount, minPlayers) {
 
 
 function calculateRewardShares(tierCount, extraShareForTop) {
-    // Initialize an array to hold the share of each tier.
+    let tiersMinusOne = tierCount - 1;
+    let baseShare = 100 / tiersMinusOne;
+
+    let topMultiplier = 1 + extraShareForTop / 2;
+    let bottomMultiplier = 1 - extraShareForTop / 2;
+
     let shares = new Array(tierCount).fill(0);
+    shares[0] = baseShare * topMultiplier; // Top tier
+    shares[tierCount - 1] = 0; // Bottom tier (last tier)
 
-    if (tierCount === 1) {
-        // If there's only one tier, it gets all the rewards.
-        shares[0] = 100;
-        return shares;
+    let remainingShare = 100 - (shares[0] + shares[tierCount - 1]);
+    let increment = (remainingShare - (baseShare * bottomMultiplier)) / (tiersMinusOne - 2);
+
+    for (let i = 1; i < tierCount - 1; i++) {
+        shares[i] = (baseShare * bottomMultiplier) + increment * (i - 1);
+        shares[i] = parseFloat(shares[i].toFixed(2)); // Round to two decimal places
     }
 
-    // Calculate the base share for the second-to-last tier.
-    let baseShare = (100 / (tierCount - 1 + extraShareForTop));
-
-    // Assign shares starting from the second-to-last tier and distribute the remaining share linearly.
-    for (let i = tierCount - 2; i > 0; i--) {
-        shares[i] = baseShare;
-    }
-
-    // Set the share for the last tier (0%) and the top tier.
-    shares[tierCount - 1] = 0; // Last tier gets 0%
-    shares[0] = baseShare * extraShareForTop; // Top tier gets its share.
-
-    // Ensure the total sums up to 100% due to possible floating-point arithmetic issues.
-    let totalShare = shares.reduce((acc, share) => acc + share, 0);
-    if (totalShare !== 100) {
-        let discrepancy = 100 - totalShare;
-        shares[1] += discrepancy; // Adjust the second tier to fix the total
-    }
-
-    // Round the shares to two decimal places.
-    return shares.map(share => Math.round(share * 100) / 100);
+    return shares;
 }
+
+// Example usage
+let tierCount = 10; // Example tier count
+let extraShareForTop = 0.5; // 50% more for the top tier
+let rewardShares = calculateRewardShares(tierCount, extraShareForTop);
+console.log(rewardShares);
 
 function updateInterface() {
     const playerCount = parseInt(document.getElementById('playerCount').value, 10);
