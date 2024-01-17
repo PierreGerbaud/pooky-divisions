@@ -63,3 +63,29 @@ label, input {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* TABLE STYLES */
+table {
+    border-collapse: collapse;
+    margin-top: 20px;
+    width: 100%;
+    table-layout: fixed; /* Helps with minimizing empty space */
+}
+
+th, td {
+    border: 1px solid #ddd; /* Light borders for cells */
+    padding: 8px;
+    text-align: center; /* Center content */
+}
+
+thead th {
+    background-color: #f4f4f4; /* Slight color difference for headers */
+}
+
+tbody tr:nth-child(odd) {   
+    background-color: #f9f9f9; /* Slight color difference for odd rows */
+}
+
+/* Hide the last row within tbody only, not affecting thead */
+tbody tr:last-child {
+    display: none;
+}
