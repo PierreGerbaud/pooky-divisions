@@ -59,4 +59,5 @@ function updateInterface() {
 
 document.addEventListener('DOMContentLoaded', (event) => {
     document.getElementById('updateButton').addEventListener('click', updateInterface);
+    updateInterface(); 
 });
