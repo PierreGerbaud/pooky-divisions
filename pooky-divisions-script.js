@@ -60,7 +60,7 @@ function calculateRewardShares(tierCount, multiplierY) {
     }
 
     // The bottom tier (last tier) gets 0%
-    shares[tierCount] = 0;
+    shares[tierCount - 2] = 0;
     shares[tierCount - 1] = 0;
 
 
