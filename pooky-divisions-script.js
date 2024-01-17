@@ -35,28 +35,25 @@ function updateInterface() {
     const tableBody = document.querySelector("#resultsTable tbody");
     tableBody.innerHTML = ""; // Clear previous results
 
-    if (playerCount >= minPlayers * 2) {
-        let divisionStartIndex = 0;
-        for (let t = 1; t <= tier; t++) {
-            const numDivisionsInTier = t === 1 ? 2 : Math.pow(2, t - 2);
-            const minPlayersInTier = divisionsPopulation.slice(divisionStartIndex, divisionStartIndex + numDivisionsInTier).reduce((a, b) => a + b, 0);
-            const maxPlayersInTier = minPlayersInTier + numDivisionsInTier; // Assuming the difference is at most 1
+    let divisionStartIndex = 0;
+    for (let t = 1; t <= tier; t++) {
+        const numDivisionsInTier = t === 1 ? 2 : Math.pow(2, t - 2);
+        const divisionEndIndex = divisionStartIndex + numDivisionsInTier;
+        const minPlayersInTier = Math.min(...divisionsPopulation.slice(divisionStartIndex, divisionEndIndex));
+        const maxPlayersInTier = Math.max(...divisionsPopulation.slice(divisionStartIndex, divisionEndIndex));
 
-            let row = `<tr>
-                <td>${t}</td>
-                <td>${numDivisionsInTier}</td>
-                <td>${minPlayersInTier}</td>
-                <td>${maxPlayersInTier}</td>
-                <td></td> <!-- Tier Share of Rewards -->
-                <td></td> <!-- Division Share of Rewards -->
-                <td></td> <!-- Division Rewards ($SILVER) -->
-            </tr>`;
+        let row = `<tr>
+            <td>${t}</td>
+            <td>${numDivisionsInTier}</td>
+            <td>${minPlayersInTier}</td>
+            <td>${maxPlayersInTier}</td>
+            <td></td> <!-- Tier Share of Rewards -->
+            <td></td> <!-- Division Share of Rewards -->
+            <td></td> <!-- Division Rewards ($SILVER) -->
+        </tr>`;
 
-            tableBody.innerHTML += row;
-            divisionStartIndex += numDivisionsInTier;
-        }
-    } else {
-        tableBody.innerHTML = `<tr><td colspan="7">Not enough players to start the game. Minimum required: ${minPlayers * 2}</td></tr>`;
+        tableBody.innerHTML += row;
+        divisionStartIndex += numDivisionsInTier;
     }
 }
 
