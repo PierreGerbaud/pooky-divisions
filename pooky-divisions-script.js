@@ -3,6 +3,7 @@ function calculateTiersAndDivisions(playerCount, minPlayers) {
     let totalDivisions = 0;
     let playersInCurrentTier = 0;
     let minPlayersToStart = minPlayers * 2; // The game starts with at least double the minimum players per division
+    let divisionsPopulation = []; // Initialize divisionsPopulation as an empty array
 
     // Check if the player count is at least the minimum to start the game
     if (playerCount >= minPlayersToStart) {
@@ -13,8 +14,8 @@ function calculateTiersAndDivisions(playerCount, minPlayers) {
             playersInCurrentTier = totalDivisions * minPlayers;
         }
 
-        // Distribute players across divisions
-        let divisionsPopulation = new Array(totalDivisions).fill(minPlayers);
+        // Initialize divisionsPopulation with the minimum number of players in each division
+        divisionsPopulation = new Array(totalDivisions).fill(minPlayers);
         let excessPlayers = playerCount - (totalDivisions * minPlayers);
 
         // Spread excess players across divisions as evenly as possible
@@ -28,6 +29,7 @@ function calculateTiersAndDivisions(playerCount, minPlayers) {
 
     return { tier, divisionsPopulation };
 }
+
 
 function updateInterface() {
     console.log("Update interface called");
