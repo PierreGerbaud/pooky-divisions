@@ -6,24 +6,27 @@ function calculateTiersAndDivisions(playerCount, minPlayers) {
     // Adjust tier and total divisions based on player count
     while (playerCount > maxPlayersInCurrentTier) {
         tier++;
-        if (tier === 2) {
-            // Tier 2 also has 2 divisions
-            totalDivisions = 2;
-        } else {
-            // Tier 3 and beyond follow the 2^(N-1) rule
-            totalDivisions = Math.pow(2, tier -1);
-        }
+        // Tier 2 has the same number of divisions as Tier 1
+        // Tier 3 and beyond double the number of divisions from the previous tier
+        totalDivisions = tier === 2 ? 2 : Math.pow(2, tier - 1);
         maxPlayersInCurrentTier = totalDivisions * minPlayers * 2; // Update the capacity for the new tier
     }
 
     // Distribute players across divisions
-    let divisionsPopulation = new Array(totalDivisions).fill(minPlayers);
-    let excessPlayers = playerCount - (totalDivisions * minPlayers);
+    let divisionsPopulation = new Array(totalDivisions).fill(0); // Initialize with 0s instead of minPlayers
+    let playersAssigned = 0;
 
+    // Distribute players to at least the minimum first
+    for (let i = 0; i < totalDivisions && playersAssigned < playerCount; i++) {
+        divisionsPopulation[i] = minPlayers;
+        playersAssigned += minPlayers;
+    }
+
+    // Distribute any remaining players
     let index = 0;
-    while (excessPlayers > 0) {
+    while (playersAssigned < playerCount) {
         divisionsPopulation[index]++;
-        excessPlayers--;
+        playersAssigned++;
         index = (index + 1) % totalDivisions; // Loop back to the first division
     }
 
@@ -66,8 +69,24 @@ function updateInterface() {
     const tableBody = document.querySelector("#resultsTable tbody");
     tableBody.innerHTML = ""; // Clear previous results
 
-    let divisionStartIndex = 0;
-    for (let t = 1; t <= tier; t++) {
+
+        let divisionStartIndex = 0;
+        for (let t = 1; t <= tier; t++) {
+        // Calculate the number of divisions in this tier
+        const numDivisionsInTier = t <= 2 ? 2 : Math.pow(2, t - 1);
+
+        // Calculate the player range for each division in this tier
+        let minPlayersInTier = Number.MAX_VALUE;
+        let maxPlayersInTier = 0;
+        for (let i = divisionStartIndex; i < divisionStartIndex + numDivisionsInTier; i++) {
+            if (divisionsPopulation[i] < minPlayersInTier) {
+                minPlayersInTier = divisionsPopulation[i];
+            }
+            if (divisionsPopulation[i] > maxPlayersInTier) {
+                maxPlayersInTier = divisionsPopulation[i];
+            }
+        }
+        
         const numDivisionsInTier = t <= 2 ? 2 : Math.pow(2, t - 1);
         const divisionEndIndex = divisionStartIndex + numDivisionsInTier;
         const minPlayersInTier = Math.min(...divisionsPopulation.slice(divisionStartIndex, divisionEndIndex));
@@ -88,7 +107,8 @@ function updateInterface() {
         </tr>`;
 
         tableBody.innerHTML += row;
-        divisionStartIndex = divisionEndIndex; // Update the start index for the next iteration
+        divisionStartIndex += numDivisionsInTier;
+        if (divisionStartIndex >= divisionsPopulation.length) break; // Break the loop if we've assigned all divisions
     }
 }
 
