@@ -13,21 +13,18 @@ function calculateTiersAndDivisions(playerCount, minPlayers) {
     }
 
     // Distribute players across divisions
-    let divisionsPopulation = new Array(totalDivisions).fill(0); // Initialize with 0s instead of minPlayers
-    let playersAssigned = 0;
+    let divisionsPopulation = new Array(totalDivisions).fill(minPlayers);
+    let playersAssigned = totalDivisions * minPlayers;
 
-    // Distribute players to at least the minimum first
-    for (let i = 0; i < totalDivisions && playersAssigned < playerCount; i++) {
-        divisionsPopulation[i] = minPlayers;
-        playersAssigned += minPlayers;
-    }
-
-    // Distribute any remaining players
-    let index = 0;
+    // Distribute any remaining players starting from the lower tier
+    let index = totalDivisions - 1; // Start from the last division
     while (playersAssigned < playerCount) {
         divisionsPopulation[index]++;
         playersAssigned++;
-        index = (index + 1) % totalDivisions; // Loop back to the first division
+        index--; // Move to the previous division
+        if (index < 0) { // If we've reached the first division, loop back to the last division
+            index = totalDivisions - 1;
+        }
     }
 
     return { tier, totalDivisions, divisionsPopulation };
