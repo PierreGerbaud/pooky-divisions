@@ -63,8 +63,8 @@ function calculateRewardShares(tierCount) {
 function updateInterface() {
     const playerCount = parseInt(document.getElementById('playerCount').value, 10);
     const minPlayers = parseInt(document.getElementById('minPlayers').value, 10);
-    const { tier, totalDivisions, divisionsPopulation } = calculateTiersAndDivisions(playerCount, minPlayers);    
-    const rewardShares = calculateRewardShares(tier); // Get reward shares for each tier
+    const { tier, totalDivisions, divisionsPopulation } = calculateTiersAndDivisions(playerCount, minPlayers);
+    const rewardShares = calculateRewardShares(tier);
 
     const tableBody = document.querySelector("#resultsTable tbody");
     tableBody.innerHTML = ""; // Clear previous results
@@ -73,14 +73,17 @@ function updateInterface() {
     for (let t = 1; t <= tier; t++) {
         const numDivisionsInTier = t <= 2 ? 2 : Math.pow(2, t - 1);
         const divisionEndIndex = divisionStartIndex + numDivisionsInTier;
-        let minPlayersInTier = Number.MAX_VALUE;
-        let maxPlayersInTier = -Number.MAX_VALUE;
+        let minPlayersInTier = divisionsPopulation[divisionStartIndex]; // Initialize to the first division's population
+        let maxPlayersInTier = divisionsPopulation[divisionStartIndex]; // Initialize to the first division's population
+
         for (let i = divisionStartIndex; i < divisionEndIndex; i++) {
-            minPlayersInTier = Math.min(minPlayersInTier, divisionsPopulation[i]);
-            maxPlayersInTier = Math.max(maxPlayersInTier, divisionsPopulation[i]);
+            if (i < divisionsPopulation.length) { // Make sure we don't go out of the array's bounds
+                minPlayersInTier = Math.min(minPlayersInTier, divisionsPopulation[i]);
+                maxPlayersInTier = Math.max(maxPlayersInTier, divisionsPopulation[i]);
+            }
         }
-        
-        const totalPlayersInTier = divisionsPopulation.slice(divisionStartIndex, divisionEndIndex).reduce((a, b) => a + b, 0);
+
+        const totalPlayersInTier = minPlayersInTier * numDivisionsInTier; // Since all divisions within a tier have the same population
         const tierRewardShare = rewardShares[t - 1];
         const divisionRewardShare = (tierRewardShare / numDivisionsInTier).toFixed(2);
 
@@ -96,7 +99,7 @@ function updateInterface() {
         </tr>`;
 
         tableBody.innerHTML += row;
-        divisionStartIndex = divisionEndIndex;
+        divisionStartIndex = divisionEndIndex; // Update the start index for the next iteration
     }
 }
 
