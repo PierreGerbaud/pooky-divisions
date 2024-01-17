@@ -86,18 +86,19 @@ console.log(rewardSharesExample);
 function updateInterface() {
     const playerCount = parseInt(document.getElementById('playerCount').value, 10);
     const minPlayers = parseInt(document.getElementById('minPlayers').value, 10);
-    const multiplier = parseFloat(document.getElementById('multiplier').value); // Get the multiplier from the input
-    const silver = parseFloat(document.getElementById('silver').value); // Get the silver from the input
+    const multiplier = parseFloat(document.getElementById('multiplier').value);
+    const silver = parseInt(document.getElementById('silver').value); // Round silver to the nearest integer
+    const silverDollarPrice = parseFloat(document.getElementById('silverDollarPrice').value);
     const { tier, totalDivisions, divisionsPopulation } = calculateTiersAndDivisions(playerCount, minPlayers);
-    const rewardShares = calculateRewardShares(tier, multiplier); // Use the multiplier from the input
+    const rewardShares = calculateRewardShares(tier, multiplier);
     const tableBody = document.querySelector("#resultsTable tbody");
-    tableBody.innerHTML = ""; // Clear previous results
+    tableBody.innerHTML = "";
 
     let divisionStartIndex = 0;
     for (let t = 1; t <= tier; t++) {
         const numDivisionsInTier = t <= 2 ? 2 : Math.pow(2, t - 1);
         const divisionEndIndex = divisionStartIndex + numDivisionsInTier;
-        
+            
         // Initialize the variables with the first element of the current tier or default values if out of bounds
         let minPlayersInTier = Number.MAX_VALUE;
         let maxPlayersInTier = -Number.MAX_VALUE;
@@ -119,9 +120,16 @@ function updateInterface() {
         }
     
         const tierRewardShare = rewardShares[t - 1];
-        const divisionRewardShare = (tierRewardShare / numDivisionsInTier).toFixed(2);
-        const divisionRewards = (silver * (divisionRewardShare / 100)).toFixed(2); // Calculate division rewards
-        
+        const divisionRewardShare = tierRewardShare / numDivisionsInTier;
+        const divisionRewards = Math.round(silver * (divisionRewardShare / 100));
+        const averageSilverPerPlayer = divisionRewards / maxPlayersInTier;
+        const averageDollarValuePerPlayer = averageSilverPerPlayer * silverDollarPrice;
+
+        // Format numbers with thousands separator
+        const formattedDivisionRewards = divisionRewards.toLocaleString();
+        const formattedAverageSilverPerPlayer = averageSilverPerPlayer.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        const formattedAverageDollarValuePerPlayer = averageDollarValuePerPlayer.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
         let row = `<tr>
             <td>${t}</td>
             <td>${numDivisionsInTier}</td>
@@ -129,8 +137,10 @@ function updateInterface() {
             <td>${maxPlayersInTier}</td>
             <td>${totalPlayersInTier}</td>
             <td>${tierRewardShare.toFixed(2)}%</td>
-            <td>${divisionRewardShare}%</td>
-            <td>$${divisionRewards}</td> <!-- Division Rewards ($SILVER) -->
+            <td>${divisionRewardShare.toFixed(2)}%</td>
+            <td>${formattedDivisionRewards}</td>
+            <td>${formattedAverageSilverPerPlayer}</td>
+            <td>${formattedAverageDollarValuePerPlayer}</td>
         </tr>`;
 
         tableBody.innerHTML += row;
