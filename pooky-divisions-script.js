@@ -2,17 +2,14 @@ function calculateTiersAndDivisions(playerCount, minPlayers) {
     let tier = 0;
     let totalDivisions = 0;
     let playersInCurrentTier = 0;
+    let minPlayersToStart = minPlayers * 2; // The game starts with at least double the minimum players per division
 
     // Check if the player count is at least the minimum to start the game
-    if (playerCount >= minPlayers) {
+    if (playerCount >= minPlayersToStart) {
         // Calculate the tier and total divisions needed to accommodate the player count
         while (playerCount > playersInCurrentTier) {
             tier++;
-            if (tier === 1) {
-                totalDivisions = 2; // Tier 1 starts with 2 divisions
-            } else {
-                totalDivisions += Math.pow(2, tier - 2); // Adding 2^(tier-2) divisions for each subsequent tier
-            }
+            totalDivisions = tier === 1 ? 2 : totalDivisions * 2; // Tier 1 starts with 2 divisions, double for each subsequent tier
             playersInCurrentTier = totalDivisions * minPlayers;
         }
 
@@ -35,13 +32,14 @@ function calculateTiersAndDivisions(playerCount, minPlayers) {
 function updateInterface() {
     const playerCount = parseInt(document.getElementById('playerCount').value, 10);
     const minPlayers = parseInt(document.getElementById('minPlayers').value, 10);
+    const minPlayersToStart = minPlayers * 2;
 
     const { tier, divisionsPopulation } = calculateTiersAndDivisions(playerCount, minPlayers);
 
     // Update the interface with the results
-    document.getElementById('output').innerHTML = playerCount >= minPlayers ?
+    document.getElementById('output').innerHTML = playerCount >= minPlayersToStart ?
         `Total Tiers: ${tier}<br>Division Populations: ${divisionsPopulation.join(', ')}` :
-        `Not enough players to start the game. Minimum required: ${minPlayers}`;
+        `Not enough players to start the game. Minimum required: ${minPlayersToStart}`;
 }
 
 window.onload = updateInterface;
