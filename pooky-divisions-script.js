@@ -61,19 +61,14 @@ function updateInterface() {
     tableBody.innerHTML = ""; // Clear previous results
 
     let divisionStartIndex = 0;
-    for (let t = 1; t <= tier; t++) 
-        {
+    for (let t = 1; t <= tier; t++) {
         const numDivisionsInTier = t === 1 ? 2 : Math.pow(2, t - 2);
-        const totalPlayersInTier = divisionsPopulation.slice(divisionStartIndex, divisionStartIndex + numDivisionsInTier).reduce((a, b) => a + b, 0);
-        const tierRewardShare = rewardShares[t - 1];
-        const divisionRewardShare = tierRewardShare / numDivisionsInTier;
-        }        
         const divisionEndIndex = divisionStartIndex + numDivisionsInTier;
         const minPlayersInTier = Math.min(...divisionsPopulation.slice(divisionStartIndex, divisionEndIndex));
         const maxPlayersInTier = Math.max(...divisionsPopulation.slice(divisionStartIndex, divisionEndIndex));
         const totalPlayersInTier = divisionsPopulation.slice(divisionStartIndex, divisionEndIndex).reduce((a, b) => a + b, 0);
         const tierRewardShare = rewardShares[t - 1];
-        const divisionRewardShare = tierRewardShare / numDivisionsInTier;
+        const divisionRewardShare = (tierRewardShare / numDivisionsInTier).toFixed(2);
 
         let row = `<tr>
             <td>${t}</td>
@@ -82,14 +77,14 @@ function updateInterface() {
             <td>${maxPlayersInTier}</td>
             <td>${totalPlayersInTier}</td>
             <td>${tierRewardShare.toFixed(2)}%</td>
-            <td>${divisionRewardShare.toFixed(2)}%</td>
+            <td>${divisionRewardShare}%</td>
             <td></td> <!-- Division Rewards ($SILVER) -->
         </tr>`;
 
         tableBody.innerHTML += row;
-        divisionStartIndex += numDivisionsInTier;
+        divisionStartIndex = divisionEndIndex; // Update the start index for the next iteration
     }
-
+}
 
 document.addEventListener('DOMContentLoaded', (event) => {
     document.getElementById('updateButton').addEventListener('click', updateInterface);
