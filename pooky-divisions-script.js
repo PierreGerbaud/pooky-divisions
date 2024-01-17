@@ -60,7 +60,7 @@ function calculateRewardShares(tierCount) {
 function updateInterface() {
     const playerCount = parseInt(document.getElementById('playerCount').value, 10);
     const minPlayers = parseInt(document.getElementById('minPlayers').value, 10);
-    const { tier, totalDivisions, divisionsPopulation } = calculateTiersAndDivisions(playerCount, minPlayers);
+    const { tier, totalDivisions, divisionsPopulation } = calculateTiersAndDivisions(playerCount, minPlayers);    
     const rewardShares = calculateRewardShares(tier); // Get reward shares for each tier
 
     const tableBody = document.querySelector("#resultsTable tbody");
@@ -68,7 +68,7 @@ function updateInterface() {
 
     let divisionStartIndex = 0;
     for (let t = 1; t <= tier; t++) {
-        const numDivisionsInTier = t === 1 ? 2 : (t === 2 ? 2 : Math.pow(2, t - 1));
+        const numDivisionsInTier = t <= 2 ? 2 : Math.pow(2, t - 1);
         const divisionEndIndex = divisionStartIndex + numDivisionsInTier;
         const minPlayersInTier = Math.min(...divisionsPopulation.slice(divisionStartIndex, divisionEndIndex));
         const maxPlayersInTier = Math.max(...divisionsPopulation.slice(divisionStartIndex, divisionEndIndex));
