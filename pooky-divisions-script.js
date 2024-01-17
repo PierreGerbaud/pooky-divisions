@@ -30,43 +30,57 @@ function calculateTiersAndDivisions(playerCount, minPlayers) {
     return { tier, totalDivisions, divisionsPopulation };
 }
 
+function calculateRewardShares(tierCount, multiplierY) {
+    // Step 1: Calculate number of tiers minus 1
+    const tiersMinusOne = tierCount - 1;
 
-function calculateRewardShares(tierCount, topTierExtra) {
+    // Step 2: Divide 100% by the result
+    const baseShare = 100 / tiersMinusOne;
+
+    // Step 3: Compute top and bottom multipliers
+    const bottomMultiplier = 2 / (2 + multiplierY);
+    const topMultiplier = bottomMultiplier * (1 + multiplierY);
+
+    // Step 4: Compute all reward splits
+    const topShare = baseShare * topMultiplier;
+    const bottomShare = baseShare * bottomMultiplier;
+
     // Initialize shares array
     let shares = new Array(tierCount).fill(0);
+    shares[0] = topShare; // Top tier share
+    shares[tierCount - 1] = 0; // Bottom tier (last tier)
 
-    // Calculate the base share for T2 to T4 (T1 has the extra, T5 is 0)
-    let distributedShare = 100 / (tierCount - 1); // Share to distribute between T2 to T5
-    let difference = distributedShare * topTierExtra / (tierCount - 2); // Difference between adjacent tiers
+    // Compute the difference between adjacent tiers (linear interpolation)
+    const increment = (topShare - bottomShare) / (tiersMinusOne - 2);
 
-    // Assign shares starting from T4 up to T2
-    for (let i = tierCount - 2; i > 0; i--) {
-        shares[i] = distributedShare - difference * (tierCount - 2 - i);
+    // Assign shares to other tiers
+    for (let i = 1; i < tierCount - 1; i++) {
+        shares[i] = shares[i - 1] - increment;
+        shares[i] = parseFloat(shares[i].toFixed(2)); // Round to two decimal places
     }
 
-    // Calculate T1 with the extra share
-    shares[0] = shares[1] + difference;
-
-    // Ensure T5 is 0%
-    shares[tierCount - 1] = 0;
-
-    // Round to three decimal places to prevent floating-point precision issues
-    shares = shares.map(share => parseFloat(share.toFixed(3)));
+    // Ensure shares add up to 100 by adjusting the top tier if necessary
+    const total = shares.reduce((acc, share) => acc + share, 0);
+    if (total !== 100) {
+        shares[0] = parseFloat((shares[0] + (100 - total)).toFixed(2));
+    }
 
     return shares;
 }
 
-// Example usage with 5 tiers and top tier having extra 50%
-let tierCount = 5;
-let topTierExtra = 0.5; // Extra 50% for top tier
-let rewardShares = calculateRewardShares(tierCount, topTierExtra);
-console.log(rewardShares);
+// Example usage
+    const tierCountExample = 10; // Example tier count
+    const multiplierYExample = 0.5; // 50% more for the top tier
+    const rewardSharesExample = calculateRewardShares(tierCountExample, multiplierYExample);
+    console.log(rewardSharesExample);
+
 
 function updateInterface() {
     const playerCount = parseInt(document.getElementById('playerCount').value, 10);
     const minPlayers = parseInt(document.getElementById('minPlayers').value, 10);
+    const multiplier = parseFloat(document.getElementById('multiplier').value); // Get the multiplier from the input
     const { tier, totalDivisions, divisionsPopulation } = calculateTiersAndDivisions(playerCount, minPlayers);
-    const rewardShares = calculateRewardShares(tier, 1.5); // Top tier gets 50% more than the second-to-last tier
+    const rewardShares = calculateRewardShares(tier, multiplier); // Use the multiplier from the input
     const tableBody = document.querySelector("#resultsTable tbody");
     tableBody.innerHTML = ""; // Clear previous results
 
