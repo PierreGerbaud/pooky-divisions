@@ -1,23 +1,24 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Player Ranking System</title>
     <script src="pooky-divisions-script.js" defer></script>
 </head>
 <body>
     <h1>Player Ranking System</h1>
-    <label for="playerCount">Number of Players:</label>
-    <input type="number" id="playerCount" value="100">
-    <button onclick="updateTiersAndDivisions()">Update</button>
-    <div id="output"></div>
-    <label for="minPlayers">Minimum Players per Division:</label>
+    <div>
+        <label for="playerCount">Number of Players:</label>
+        <input type="number" id="playerCount" value="100">
+    </div>
+    <div>
+        <label for="minPlayers">Minimum Players per Division:</label>
         <input type="number" id="minPlayers" value="16">
-    <label for="maxPlayers">Maximum Players per Division:</label>
-        <input type="number" id="maxPlayers" value="31">
-    <label for="promote">Players Promoted:</label>
-        <input type="number" id="promote" value="2">
-    <label for="demote">Players Demoted:</label>
-        <input type="number" id="demote" value="4">
-
+    </div>
+    <div>
+        <button onclick="updateInterface()">Update</button>
+    </div>
+    <div id="output"></div>
 </body>
 </html>
