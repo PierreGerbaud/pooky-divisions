@@ -1,4 +1,3 @@
-@ -1,155 +1,157 @@
 function calculateTiersAndDivisions(playerCount, minPlayers) {
     let tier = 1;
     let totalDivisions = 2; // Tier 1 starts with 2 divisions
@@ -28,7 +27,10 @@ function calculateTiersAndDivisions(playerCount, minPlayers) {
         }
     }
 
-    tier--;
+    // Check if the last tier has no players
+    if (playerCount <= (maxPlayersInCurrentTier - totalDivisions * minPlayers)) {
+        tier--; // Reduce the tier count by 1 as the last tier has no players
+    }
 
     return { tier, totalDivisions, divisionsPopulation };
 }
