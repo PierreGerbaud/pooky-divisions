@@ -104,7 +104,7 @@ tbody tr:nth-child(odd) {
     background-color: #f9f9f9; /* Slight color difference for odd rows */
 }
 
-/* Hide the last row within tbody only, not affecting thead 
+Hide the last row within tbody only, not affecting thead 
 tbody tr:last-child {
     display: none;
-} */
+}
