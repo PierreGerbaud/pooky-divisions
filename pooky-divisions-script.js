@@ -38,9 +38,7 @@ function calculateTiersAndDivisions(playerCount, minPlayers) {
 function calculateRewardShares(tierCount, multiplierY) {
     // Calculate the number of tiers minus one
     const tiersMinusOne = tierCount - 1;
-
-    // Divide 100% by the result to get the base share for each tier except the top and bottom
-    const baseShare = 95 / tiersMinusOne;
+    const baseShare = (100 - topShareBonus) / tiersMinusOne;
 
     // Compute the bottom multiplier
     const bottomMultiplier = 2 / (2 + multiplierY);
@@ -95,7 +93,8 @@ function updateInterface() {
     const silver = parseInt(document.getElementById('silver').value); // Round silver to the nearest integer
     const silverDollarPrice = parseFloat(document.getElementById('silverDollarPrice').value);
     const { tier, totalDivisions, divisionsPopulation } = calculateTiersAndDivisions(playerCount, minPlayers);
-    const rewardShares = calculateRewardShares(tier, multiplier);
+    const topShareBonus = parseFloat(document.getElementById('topShareBonus').value);
+    const rewardShares = calculateRewardShares(tier, multiplier, topShareBonus);
     const tableBody = document.querySelector("#resultsTable tbody");
     tableBody.innerHTML = "";
 

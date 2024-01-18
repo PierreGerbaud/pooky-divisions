@@ -1,3 +1,4 @@
+@ -1,69 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,6 +24,7 @@
     <div class="parameters">
         <div class="input-group">
             <label for="playerCount">Number of Players:</label>
+            <input type="number" id="playerCount" value="100" step="100" min="1">
             <input type="number" id="playerCount" value="800" step="100" min="1">
         </div>
         <div class="input-group">
@@ -34,9 +36,9 @@
             <input type="number" id="multiplier" value="0.5" step="0.1" min="0">
         </div>
         <div class="input-group">
-            <label for="topTierExtraShare">Top Tier Extra Share (%):</label>
-            <input type="number" id="topTierExtraShare" value="5" step="0.1" min="0" max="100">
-        </div>          
+            <label for="topShareBonus">Top Tier Bonus Share:</label>
+            <input type="number" id="topShareBonus" value="5" step="0.1" min="0" max="100">
+        </div>       
         <div class="input-group">
             <label for="silver">Total SILVER:</label>
             <input type="number" id="silver" value="1000000" step="10000" min="0">
@@ -71,8 +73,3 @@
         </table>
     </div>
     
-
-
-</body>
-</html>
-
