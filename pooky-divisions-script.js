@@ -27,6 +27,8 @@ function calculateTiersAndDivisions(playerCount, minPlayers) {
         }
     }
 
+    tier--;
+
     return { tier, totalDivisions, divisionsPopulation };
 }
 
