@@ -18,6 +18,12 @@
             <li><i>How do we seed new players? After how long do we remove inactive players?</i></li>
             <li><i>It will be harder to guarantee average ROI for higher rarities, as a bad streak can take them down by a couple ranks.</i></li>
         </ul>
+        <p>Static items:</p>
+        <ul>
+            <li><i>Max players in a division is always 2x the minimum, passing this value generates a new tier.</i></li>
+            <li><i>Top tier gets an extra [5]% rewards, which is not a parameter yet but can be updated from static code.</i></li>
+            <li><i>Distribution between tiers is linear, it could need fine tuning.</i></li>
+        </ul>        
         <p><i>Latest update 18/01/2024</i></p>
     </div>
     <div class="parameters">
@@ -33,10 +39,6 @@
             <label for="multiplier">Top Tier Multiplier:</label>
             <input type="number" id="multiplier" value="0.5" step="0.1" min="0">
         </div>
-        <div class="input-group">
-            <label for="topShareBonus">Top Tier Extra Share (%):</label>
-            <input type="number" id="topShareBonus" value="5" step="0.1" min="0" max="100">
-        </div>       
         <div class="input-group">
             <label for="silver">Total SILVER:</label>
             <input type="number" id="silver" value="1000000" step="10000" min="0">
