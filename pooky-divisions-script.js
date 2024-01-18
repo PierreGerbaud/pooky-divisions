@@ -1,27 +1,32 @@
 function calculateTiersAndDivisions(playerCount, minPlayers) {
     let tier = 0;
-    let totalPlayersInTiers = 0;
+    let maxPlayersInCurrentTier = 0;
+    let divisionsPopulation = [];
 
-    // Loop to determine the number of tiers
-    while (totalPlayersInTiers < playerCount) {
+    // Calculate the number of tiers based on player count and minimum players
+    while (maxPlayersInCurrentTier < playerCount) {
         tier++;
-        totalPlayersInTiers = (Math.pow(2, tier) - 1) * minPlayers;
+        let divisionsInThisTier = Math.pow(2, tier - 1);
+        maxPlayersInCurrentTier += divisionsInThisTier * minPlayers;
+        divisionsPopulation = divisionsPopulation.concat(new Array(divisionsInThisTier).fill(minPlayers));
     }
 
-    // Determine the number of divisions and their populations
-    const divisionsPopulation = new Array(Math.pow(2, tier - 1)).fill(minPlayers);
-    let remainingPlayers = playerCount - (Math.pow(2, tier - 1) - 1) * minPlayers;
+    // Distribute any remaining players starting from the lower tier
+    let playersToDistribute = playerCount - (maxPlayersInCurrentTier - Math.pow(2, tier - 1) * minPlayers);
+    for (let i = divisionsPopulation.length - 1; i >= 0 && playersToDistribute > 0; i--) {
+        divisionsPopulation[i]++;
+        playersToDistribute--;
+    }
 
-    // Distribute remaining players across divisions
-    let index = 0;
-    while (remainingPlayers > 0) {
-        divisionsPopulation[index]++;
-        remainingPlayers--;
-        index = (index + 1) % divisionsPopulation.length;
+    // If last tier has no players, remove it
+    if (playersToDistribute < 0) {
+        divisionsPopulation.splice(-Math.pow(2, tier - 1));
+        tier--;
     }
 
     return { tier, divisionsPopulation };
 }
+
 
 function calculateRewardShares(tierCount, multiplierY) {
     if (tierCount < 3) return Array(tierCount).fill(100 / tierCount);
@@ -50,62 +55,37 @@ function updateInterface() {
     const playerCount = parseInt(document.getElementById('playerCount').value, 10);
     const minPlayers = parseInt(document.getElementById('minPlayers').value, 10);
     const multiplier = parseFloat(document.getElementById('multiplier').value);
-    const silver = parseInt(document.getElementById('silver').value);
-    const silverDollarPrice = parseFloat(document.getElementById('silverDollarPrice').value);
-
-    // Calculate tiers and populations
-    let { tier, divisionsPopulation } = calculateTiersAndDivisions(playerCount, minPlayers);
-
-    // Adjust the number of tiers if the last tier has no players
-    if (divisionsPopulation[divisionsPopulation.length - 1] === minPlayers && playerCount <= (Math.pow(2, tier - 1) - 1) * minPlayers) {
-        tier -= 1; // Remove the last tier
-        divisionsPopulation.pop(); // Remove the last division since it's empty
-    }
-
-    // Calculate reward shares excluding the last and second-to-last tiers from rewards
+    const { tier, divisionsPopulation } = calculateTiersAndDivisions(playerCount, minPlayers);
     const rewardShares = calculateRewardShares(tier, multiplier);
-
-    // Update the table body with new data
     const tableBody = document.querySelector("#resultsTable tbody");
-    tableBody.innerHTML = "";
+    tableBody.innerHTML = ""; // Clear previous results
 
-    let divisionIndex = 0;
     for (let t = 1; t <= tier; t++) {
         const numDivisionsInTier = Math.pow(2, t - 1);
-        const divisionRewardShare = rewardShares[t - 1] / numDivisionsInTier;
+        const divisionStartIndex = numDivisionsInTier - 2;
+        const divisionEndIndex = divisionStartIndex + numDivisionsInTier;
 
-        for (let d = 0; d < numDivisionsInTier; d++) {
-            const playersInDivision = divisionsPopulation[divisionIndex];
-            const divisionRewards = Math.round(silver * (divisionRewardShare / 100));
-            const averageSilverPerPlayer = divisionRewards / playersInDivision;
-            const averageDollarValuePerPlayer = averageSilverPerPlayer * silverDollarPrice;
+        let totalPlayersInTier = divisionsPopulation.slice(divisionStartIndex, divisionEndIndex).reduce((a, b) => a + b, 0);
+        const tierRewardShare = rewardShares[t - 1];
+        const divisionRewardShare = tierRewardShare / numDivisionsInTier;
 
-            // Format numbers with thousands separator
-            const formattedDivisionRewards = divisionRewards.toLocaleString();
-            const formattedAverageSilverPerPlayer = averageSilverPerPlayer.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            const formattedAverageDollarValuePerPlayer = averageDollarValuePerPlayer.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        let row = `<tr>
+            <td>${t}</td>
+            <td>${numDivisionsInTier}</td>
+            <td>${Math.min(...divisionsPopulation.slice(divisionStartIndex, divisionEndIndex))}</td>
+            <td>${Math.max(...divisionsPopulation.slice(divisionStartIndex, divisionEndIndex))}</td>
+            <td>${totalPlayersInTier}</td>
+            <td>${tierRewardShare.toFixed(2)}%</td>
+            <td>${divisionRewardShare.toFixed(2)}%</td>
+            <td></td> <!-- SILVER per division -->
+            <td></td> <!-- Average SILVER per player -->
+            <td></td> <!-- Average USD per player -->
+        </tr>`;
 
-            let row = `<tr>
-                <td>${t}</td>
-                <td>${numDivisionsInTier}</td>
-                <td>${playersInDivision}</td>
-                <td>${playersInDivision}</td>
-                <td>${playersInDivision * numDivisionsInTier}</td>
-                <td>${rewardShares[t - 1].toFixed(2)}%</td>
-                <td>${divisionRewardShare.toFixed(2)}%</td>
-                <td>${formattedDivisionRewards}</td>
-                <td>${formattedAverageSilverPerPlayer}</td>
-                <td>${formattedAverageDollarValuePerPlayer}</td>
-            </tr>`;
-
-            tableBody.innerHTML += row;
-            divisionIndex++;
-        }
+        tableBody.innerHTML += row;
     }
 }
 
 document.addEventListener('DOMContentLoaded', (event) => {
     document.getElementById('updateButton').addEventListener('click', updateInterface);
-    // Perform initial update
-    updateInterface();
 });
