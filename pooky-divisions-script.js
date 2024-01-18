@@ -1,15 +1,19 @@
 function calculateTiersAndDivisions(playerCount, minPlayers) {
     let tier = 1;
     let totalDivisions = 2; // Tier 1 starts with 2 divisions
-    let maxPlayersInCurrentTier = totalDivisions * minPlayers * 2; // Maximum capacity of the current tier
+    let maxPlayersInCurrentTier = totalDivisions * minPlayers;
 
     // Adjust tier and total divisions based on player count
     while (playerCount > maxPlayersInCurrentTier) {
+        // Increase tier count and calculate new divisions only if necessary
         tier++;
-        // Tier 2 has the same number of divisions as Tier 1
-        // Tier 3 and beyond double the number of divisions from the previous tier
-        totalDivisions = tier === 2 ? 2 : Math.pow(2, tier - 1);
-        maxPlayersInCurrentTier = totalDivisions * minPlayers * 2; // Update the capacity for the new tier
+        totalDivisions = (tier === 2) ? 2 : totalDivisions * 2;
+        maxPlayersInCurrentTier += totalDivisions * minPlayers;
+    }
+
+    // Check if the last tier has 0 players
+    if (playerCount <= (maxPlayersInCurrentTier - totalDivisions * minPlayers)) {
+        tier--; // Reduce the tier count by 1 as the last tier has no players
     }
 
     // Distribute players across divisions
@@ -21,14 +25,13 @@ function calculateTiersAndDivisions(playerCount, minPlayers) {
     while (playersAssigned < playerCount) {
         divisionsPopulation[index]++;
         playersAssigned++;
-        index--; // Move to the previous division
-        if (index < 0) { // If we've reached the first division, loop back to the last division
-            index = totalDivisions - 1;
-        }
+        index = (index > 0) ? index - 1 : totalDivisions - 1;
     }
 
-    return { tier, totalDivisions, divisionsPopulation };
+    // Return only the populated tiers and divisions
+    return { tier, divisionsPopulation: divisionsPopulation.slice(0, tier * 2) };
 }
+
 
 function calculateRewardShares(tierCount, multiplierY) {
     // Calculate the number of tiers minus one
@@ -87,38 +90,28 @@ function updateInterface() {
     const playerCount = parseInt(document.getElementById('playerCount').value, 10);
     const minPlayers = parseInt(document.getElementById('minPlayers').value, 10);
     const multiplier = parseFloat(document.getElementById('multiplier').value);
-    const silver = parseInt(document.getElementById('silver').value); // Round silver to the nearest integer
+    const silver = parseInt(document.getElementById('silver').value);
     const silverDollarPrice = parseFloat(document.getElementById('silverDollarPrice').value);
-    const { tier, totalDivisions, divisionsPopulation } = calculateTiersAndDivisions(playerCount, minPlayers);
+    const { tier, divisionsPopulation } = calculateTiersAndDivisions(playerCount, minPlayers);
     const rewardShares = calculateRewardShares(tier, multiplier);
     const tableBody = document.querySelector("#resultsTable tbody");
-    tableBody.innerHTML = "";
+    tableBody.innerHTML = ""; // Clear previous results
 
-    let divisionStartIndex = 0;
+    let divisionIndex = 0;
     for (let t = 1; t <= tier; t++) {
-        const numDivisionsInTier = t <= 2 ? 2 : Math.pow(2, t - 1);
-        const divisionEndIndex = divisionStartIndex + numDivisionsInTier;
-            
-        // Initialize the variables with the first element of the current tier or default values if out of bounds
-        let minPlayersInTier = Number.MAX_VALUE;
-        let maxPlayersInTier = -Number.MAX_VALUE;
+        const numDivisionsInTier = t === 1 ? 2 : Math.pow(2, t - 1);
+        let minPlayersInTier = divisionsPopulation[divisionIndex] || 0;
+        let maxPlayersInTier = divisionsPopulation[divisionIndex] || 0;
         let totalPlayersInTier = 0;
-    
-        for (let i = divisionStartIndex; i < divisionEndIndex; i++) {
-            if (i < divisionsPopulation.length) { // Check bounds to avoid undefined
+
+        for (let i = divisionIndex; i < divisionIndex + numDivisionsInTier; i++) {
+            if (divisionsPopulation[i] !== undefined) {
                 minPlayersInTier = Math.min(minPlayersInTier, divisionsPopulation[i]);
                 maxPlayersInTier = Math.max(maxPlayersInTier, divisionsPopulation[i]);
                 totalPlayersInTier += divisionsPopulation[i];
             }
         }
-        
-        // Check if no divisions were found for this tier, and set values to 0 to avoid NaN or undefined
-        if(minPlayersInTier === Number.MAX_VALUE) {
-            minPlayersInTier = 0;
-            maxPlayersInTier = 0;
-            totalPlayersInTier = 0;
-        }
-    
+
         const tierRewardShare = rewardShares[t - 1];
         const divisionRewardShare = tierRewardShare / numDivisionsInTier;
         const divisionRewards = Math.round(silver * (divisionRewardShare / 100));
@@ -127,8 +120,8 @@ function updateInterface() {
 
         // Format numbers with thousands separator
         const formattedDivisionRewards = divisionRewards.toLocaleString();
-        const formattedAverageSilverPerPlayer = averageSilverPerPlayer.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-        const formattedAverageDollarValuePerPlayer = averageDollarValuePerPlayer.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        const formattedAverageSilverPerPlayer = averageSilverPerPlayer.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const formattedAverageDollarValuePerPlayer = averageDollarValuePerPlayer.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
         let row = `<tr>
             <td>${t}</td>
@@ -144,7 +137,7 @@ function updateInterface() {
         </tr>`;
 
         tableBody.innerHTML += row;
-        divisionStartIndex = divisionEndIndex;
+        divisionIndex += numDivisionsInTier;
     }
 }
 
