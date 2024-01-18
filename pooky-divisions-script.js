@@ -36,48 +36,33 @@ function calculateTiersAndDivisions(playerCount, minPlayers) {
 }
 
 function calculateRewardShares(tierCount, multiplierY, topShareBonus) {
-    // Calculate the number of tiers minus one
     const tiersMinusOne = tierCount - 1;
-
-    // Adjust the total reward pool by the topShareBonus
     const adjustedTotalRewardPool = 100 - topShareBonus;
-
-    // Divide adjustedTotalRewardPool by tiersMinusOne to get the base share for each tier except the top and bottom
     const baseShare = adjustedTotalRewardPool / tiersMinusOne;
 
-    // Compute the multipliers
     const bottomMultiplier = 2 / (2 + multiplierY);
     const topMultiplier = bottomMultiplier * (1 + multiplierY);
 
-    // Initialize shares array with the base share
     let shares = new Array(tierCount).fill(baseShare);
 
-    // Adjust the top tier's share by the topMultiplier and topShareBonus
-    shares[0] = baseShare * topMultiplier + topShareBonus;
-
-    // Linear interpolation for the middle tiers
+    shares[0] = (baseShare * topMultiplier) + topShareBonus;
+    const increment = (shares[0] - baseShare) / (tiersMinusOne - 1);
     for (let i = 1; i < tierCount - 1; i++) {
-        shares[i] = shares[i - 1] - (shares[0] - baseShare) / (tiersMinusOne - 1);
+        shares[i] = shares[i - 1] - increment;
     }
+    shares[tierCount - 1] = 0; // Bottom tier gets nothing
 
-    // The bottom tier (last tier) gets 0%
-    shares[tierCount - 1] = 0;
+    shares = shares.map(share => parseFloat(share.toFixed(2))); // Round to two decimal places
 
-    // Round shares to two decimal places
-    shares = shares.map(share => parseFloat(share.toFixed(2)));
-
-    // Verify the total is 100% and adjust if necessary
     let totalShare = shares.reduce((acc, share) => acc + share, 0);
     if (totalShare !== 100) {
         let discrepancy = 100 - totalShare;
         shares[0] += discrepancy; // Adjust the top tier to fix the total
-        shares[0] = parseFloat(shares[0].toFixed(2)); // Ensure two decimal places after adjustment
+        shares[0] = parseFloat(shares[0].toFixed(2)); // Two decimal places
     }
 
     return shares;
 }
-
-
 
 function updateInterface() {
     const playerCount = parseInt(document.getElementById('playerCount').value, 10);
@@ -86,7 +71,7 @@ function updateInterface() {
     const silver = parseInt(document.getElementById('silver').value); // Round silver to the nearest integer
     const silverDollarPrice = parseFloat(document.getElementById('silverDollarPrice').value);
     const { tier, totalDivisions, divisionsPopulation } = calculateTiersAndDivisions(playerCount, minPlayers);
-    const topShareBonus = parseFloat(document.getElementById('topShareBonus').value);
+    const topShareBonus = parseFloat(document.getElementById('topShareBonus').value); // Get the topShareBonus from the input
     const rewardShares = calculateRewardShares(tier, multiplier, topShareBonus);
     const tableBody = document.querySelector("#resultsTable tbody");
     tableBody.innerHTML = "";
