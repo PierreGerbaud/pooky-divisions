@@ -35,9 +35,11 @@ function calculateTiersAndDivisions(playerCount, minPlayers) {
     return { tier, totalDivisions, divisionsPopulation };
 }
 
-function calculateRewardShares(tierCount, multiplierY) {
+function calculateRewardShares(tierCount, multiplierY, topShareBonus) {
     // Calculate the number of tiers minus one
     const tiersMinusOne = tierCount - 1;
+
+    // Divide (100 - topShareBonus) by the result to get the base share for each tier except the top and bottom
     const baseShare = (100 - topShareBonus) / tiersMinusOne;
 
     // Compute the bottom multiplier
@@ -48,7 +50,8 @@ function calculateRewardShares(tierCount, multiplierY) {
 
     // Compute all reward splits
     const topShare = baseShare * topMultiplier;
-    const bottomShare = baseShare * bottomMultiplier; // This will actually be 0 since the bottom tier gets nothing
+    // The bottom tier gets nothing, so we can remove the bottomShare variable
+    // const bottomShare = baseShare * bottomMultiplier; // This line is not needed
 
     // Initialize shares array
     let shares = new Array(tierCount).fill(0);
@@ -57,7 +60,7 @@ function calculateRewardShares(tierCount, multiplierY) {
     shares[0] = topShare;
 
     // Linear interpolation for the other tiers
-    const increment = (topShare - bottomShare) / (tierCount - 2);
+    const increment = (topShare - baseShare) / (tierCount - 2); // Adjusted to subtract baseShare instead of bottomShare
     for (let i = 1; i < tierCount - 1; i++) {
         shares[i] = shares[i - 1] - increment;
     }
@@ -65,25 +68,18 @@ function calculateRewardShares(tierCount, multiplierY) {
     // The bottom tier (last tier) gets 0%
     shares[tierCount - 1] = 0;
 
-    // Round shares to two decimal places and adjust to ensure the sum is 100%
+    // Round shares to two decimal places and adjust to ensure the sum is (100 - topShareBonus)
     let totalShare = shares.reduce((acc, share) => acc + share, 0);
-    let adjustment = 95 - totalShare;
+    let adjustment = (100 - topShareBonus) - totalShare;
 
     // Apply the adjustment to the top tier
     shares[0] += adjustment;
-    shares[0] += 5;
 
     // Round the shares to two decimal places
     shares = shares.map(share => parseFloat(share.toFixed(2)));
 
     return shares;
 }
-
-// Example usage
-const tierCountExample = 10; // Example tier count
-const multiplierYExample = 0.25; // Multiplier for the top tier
-const rewardSharesExample = calculateRewardShares(tierCountExample, multiplierYExample);
-console.log(rewardSharesExample);
 
 
 function updateInterface() {
