@@ -32,27 +32,34 @@ function calculateTiersAndDivisions(playerCount, minPlayers) {
     return { tier, totalDivisions, divisionsPopulation };
 }
 
-function calculateRewardShares(tierCount, multiplierY, topTierExtraShare) {
-    // Calculate the number of tiers minus two, since the last tier gets 0%
+function calculateRewardShares(tierCount, multiplierY, topTierExtraSharePercent) {
+    // Calculate the number of tiers minus two (excluding the top and bottom tiers from the distribution)
     const tiersMinusTwo = tierCount - 2;
-    
-    // Calculate the share to be distributed among the tiers except the top and bottom
-    const distributedShare = 100 - topTierExtraShare;
-    
-    // Divide the distributed share by the result to get the base share for each tier
-    const baseShare = distributedShare / tiersMinusTwo;
+
+    // Divide the (100 - topTierExtraSharePercent)% by the result to get the base share for each tier
+    const baseShare = (100 - topTierExtraSharePercent) / tiersMinusTwo;
+
+    // Compute the bottom multiplier
+    const bottomMultiplier = 2 / (2 + multiplierY);
+
+    // Compute the top multiplier
+    const topMultiplier = bottomMultiplier * (1 + multiplierY);
+
+    // Compute all reward splits
+    const topShare = baseShare * topMultiplier;
+    const bottomShare = baseShare * bottomMultiplier; // The bottom tier gets nothing
 
     // Initialize shares array
     let shares = new Array(tierCount).fill(0);
 
-    // Linear interpolation for the middle tiers
-    const increment = baseShare / (tiersMinusTwo - 1);
-    for (let i = 1; i < tiersMinusTwo; i++) {
-        shares[i] = shares[i - 1] + increment;
-    }
+    // Set the top tier's share
+    shares[0] = topShare;
 
-    // Apply the top tier extra share
-    shares[0] = shares[1] * (1 + multiplierY) + topTierExtraShare;
+    // Linear interpolation for the other tiers
+    const increment = (topShare - bottomShare) / (tiersMinusTwo - 1);
+    for (let i = 1; i < tierCount - 1; i++) {
+        shares[i] = shares[i - 1] - increment;
+    }
 
     // The bottom tier (last tier) gets 0%
     shares[tierCount - 1] = 0;
@@ -60,8 +67,12 @@ function calculateRewardShares(tierCount, multiplierY, topTierExtraShare) {
     // Round shares to two decimal places
     shares = shares.map(share => parseFloat(share.toFixed(2)));
 
+    // Add the extra share to the top tier
+    shares[0] += topTierExtraSharePercent;
+
     return shares;
 }
+
 
 // Example usage
 const topTierExtraShareExample = 5; // 5% reserved for top tier
